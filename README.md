@@ -50,6 +50,14 @@ import joblib
 # Charger les données
 data = pd.read_csv('data.csv')
 
+# Convertir les heures
+def time_to_minutes(time_str):
+    h, m = map(int, time_str.split(':'))
+    return h * 60 + m
+
+data['Arrivée'] = data['Arrivée'].apply(time_to_minutes)
+data['Départ'] = data['Départ'].apply(time_to_minutes)
+
 # Encodage des variables catégorielles
 encoder = OneHotEncoder()
 encoded_features = encoder.fit_transform(data[['Type_Service', 'Jour_Semaine', 'Heure']])
