@@ -1,92 +1,62 @@
+Voici le fichier `README.md` mis à jour avec les dernières modifications et en tenant compte de la structure et des fonctions actuelles :
+
+```markdown
 # Création d'un Modèle d'IA pour la Gestion des Files d'Attente
 
 ## Introduction
 
-Ce projet vise à créer un modèle d'intelligence artificielle capable de prédire les temps d'attente et d'optimiser la gestion des files d'attente dans un contexte médical ou administratif. Ce document présente les différentes étapes de la création du modèle, ainsi que des exemples de données et de traitement, tout en utilisant le framework Symfony pour le développement et le déploiement.
+Ce projet vise à créer un modèle d'intelligence artificielle capable de prédire les temps d'attente dans un contexte médical ou administratif. Ce document décrit les étapes de création du modèle, l'entraînement, la prédiction et la sauvegarde des résultats, en utilisant des scripts Python. 
 
-## Plateformes Recommandées
+## Structure du Répertoire
 
-Pour développer et déployer votre modèle d'IA, voici quelques plateformes recommandées :
+Voici la structure des fichiers du projet :
 
-1. **Google Colab** : Une plateforme gratuite offrant un environnement de développement en Python avec des GPU pour accélérer l'entraînement des modèles.
-2. **Amazon SageMaker** : Un service de machine learning complet et entièrement géré pour construire, entraîner et déployer des modèles ML.
-3. **Microsoft Azure Machine Learning** : Un service qui permet de créer et déployer des modèles d'apprentissage automatique rapidement.
-4. **IBM Watson Studio** : Une plateforme de data science et de machine learning pour collaborer, créer et déployer des modèles.
-5. **Kaggle** : Une plateforme de data science offrant des environnements de codage et des compétitions pour améliorer vos compétences en ML.
+```
+Ai Model :
+|-- data.csv
+|-- main.py
+|-- predict_and_save.py
+|-- requirements.txt
+|-- train_model.py
+```
 
-## Exemples de Données
+- **`data.csv`** : Fichier contenant les données d'entrée pour l'entraînement et les prédictions.
+- **`main.py`** : Script principal pour exécuter les processus d'entraînement et de prédiction.
+- **`predict_and_save.py`** : Script pour effectuer des prédictions avec le modèle entraîné et sauvegarder les résultats dans un fichier CSV.
+- **`requirements.txt`** : Liste des dépendances Python nécessaires.
+- **`train_model.py`** : Script pour entraîner le modèle et sauvegarder le modèle et l'encodeur.
 
-Les données utilisées pour entraîner le modèle doivent inclure les informations suivantes :
+## Préparation et Traitement des Données
+
+Les données utilisées pour entraîner le modèle doivent être au format CSV et inclure les colonnes suivantes :
 
 - Horaires d'arrivée des patients
 - Horaires de départ des patients
 - Type de service ou de consultation
 - Durée des consultations
-- Nombre de patients en attente
-- Personnel médical disponible
 - Variables contextuelles (jour de la semaine, heure de la journée, etc.)
 
 **Exemple de structure de données :**
 
 ```csv
-Patient_ID,Arrivée,Départ,Type_Service,Durée,Patients_Attente,Personnel_Dispo,Jour_Semaine,Heure
-1,08:00,08:30,Consultation,30,5,3,Lundi,Matin
-2,08:15,08:45,Urgence,30,6,3,Lundi,Matin
-...
+Patient_ID,Arrivée,Départ,Type_Service,Durée,Jour_Semaine,Heure
+1,08:00,08:30,Consultation,30,Lundi,Matin
+2,08:15,08:45,Urgence,30,Lundi,Matin
 ```
 
-## Préparation et Traitement des Données
+## Scripts Python
 
-Voici un exemple de script Python pour préparer et traiter les données avant de les utiliser pour entraîner un modèle d'IA :
+### Entraînement du Modèle
 
-```python
-import pandas as pd
-from sklearn.preprocessing import OneHotEncoder
-from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import mean_absolute_error
-import joblib
+**`train_model.py`** : Ce script entraîne le modèle en utilisant les données contenues dans `data.csv`. Il prépare les données, entraîne un modèle de régression avec RandomForest, évalue le modèle, et sauvegarde le modèle ainsi que l'encodeur pour les variables catégorielles.
 
-# Charger les données
-data = pd.read_csv('data.csv')
+### Prédictions et Sauvegarde
 
-# Convertir les heures
-def time_to_minutes(time_str):
-    h, m = map(int, time_str.split(':'))
-    return h * 60 + m
+**`predict_and_save.py`** : Ce script charge le modèle et l'encodeur sauvegardés, effectue des prédictions sur les données de `data.csv`, et sauvegarde les résultats dans `predictions_results.csv`.
 
-data['Arrivée'] = data['Arrivée'].apply(time_to_minutes)
-data['Départ'] = data['Départ'].apply(time_to_minutes)
+### Script Principal
 
-# Encodage des variables catégorielles
-encoder = OneHotEncoder()
-encoded_features = encoder.fit_transform(data[['Type_Service', 'Jour_Semaine', 'Heure']])
-
-# Ajouter les nouvelles features encodées au DataFrame
-data = pd.concat([data, pd.DataFrame(encoded_features.toarray())], axis=1)
-data.drop(['Type_Service', 'Jour_Semaine', 'Heure'], axis=1, inplace=True)
-
-# Convertir tous les noms de colonnes en chaînes de caractères
-data.columns = data.columns.astype(str)
-
-# Séparer les features et la cible
-X = data.drop(['Durée'], axis=1)
-y = data['Durée']
-
-# Diviser les données en ensembles d'entraînement et de test
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-# Entraîner le modèle
-model = RandomForestRegressor(n_estimators=100, random_state=42)
-model.fit(X_train, y_train)
-
-# Prédire et évaluer
-y_pred = model.predict(X_test)
-print(f'Mean Absolute Error: {mean_absolute_error(y_test, y_pred)}')
-
-# Sauvegarder le modèle
-joblib.dump(model, 'model.joblib')
-```
+**`main.py`** : Ce script exécute les processus d'entraînement et de prédiction en appelant les scripts `train_model.py` et `predict_and_save.py` respectivement.
 
 ## Installation des Dépendances
 
@@ -106,19 +76,9 @@ Pour installer les dépendances, exécutez la commande suivante dans votre termi
 pip install -r requirements.txt
 ```
 
-### Dépendances Symfony
-
-Assurez-vous d'avoir Composer installé. Si ce n'est pas le cas, suivez les instructions sur [getcomposer.org](https://getcomposer.org/).
-
-Installez les dépendances Symfony en exécutant la commande suivante dans le répertoire de votre projet :
-
-```bash
-composer install
-```
-
 ### Installation de Python
 
-Vous devrez également installer Python et les modules nécessaires. Assurez-vous d'avoir Python installé, puis créez un environnement virtuel et installez les modules nécessaires :
+Assurez-vous d'avoir Python installé sur votre machine. Vous pouvez créer un environnement virtuel et installer les modules nécessaires comme suit :
 
 ```bash
 # Créez et activez un environnement virtuel
@@ -129,105 +89,22 @@ source venv/bin/activate  # Sur Windows, utilisez `venv\Scripts\activate`
 pip install -r requirements.txt
 ```
 
-## Déploiement et Intégration avec Symfony
+## Utilisation
 
-Pour intégrer et déployer le modèle d'IA avec Symfony, vous pouvez créer un service Symfony pour charger le modèle et créer une API pour les prédictions.
+Pour entraîner le modèle, faire des prédictions et sauvegarder les résultats, exécutez le script principal :
 
-### Création du Service
-
-Créez un service Symfony pour charger le modèle et effectuer des prédictions. Voici un exemple de service :
-
-```php
-// src/Service/PredictService.php
-namespace App\Service;
-
-use Symfony\Component\Process\Exception\ProcessFailedException;
-use Symfony\Component\Process\Process;
-
-class PredictService
-{
-    private $modelPath;
-
-    public function __construct(string $modelPath)
-    {
-        $this->modelPath = $modelPath;
-    }
-
-    public function predict(array $features): float
-    {
-        $process = new Process(['python3', 'predict.py', json_encode($features), $this->modelPath]);
-        $process->run();
-
-        if (!$process->isSuccessful()) {
-            throw new ProcessFailedException($process);
-        }
-
-        return floatval($process->getOutput());
-    }
-}
+```bash
+python main.py
 ```
 
-### Script de Prédiction Python
+Ce script exécute les deux étapes suivantes :
 
-Créez un script Python pour charger le modèle et effectuer des prédictions :
-
-```python
-# predict.py
-import sys
-import json
-import joblib
-
-def main():
-    features = json.loads(sys.argv[1])
-    model_path = sys.argv[2]
-
-    model = joblib.load(model_path)
-    prediction = model.predict([features])
-
-    print(prediction[0])
-
-if __name__ == "__main__":
-    main()
-```
-
-### Contrôleur Symfony
-
-Créez un contrôleur pour exposer une API de prédiction :
-
-```php
-// src/Controller/PredictController.php
-namespace App\Controller;
-
-use App\Service\PredictService;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Annotation\Route;
-
-class PredictController extends AbstractController
-{
-    private $predictService;
-
-    public function __construct(PredictService $predictService)
-    {
-        $this->predictService = $predictService;
-    }
-
-    /**
-     * @Route("/predict", name="predict", methods={"POST"})
-     */
-    public function predict(Request $request): JsonResponse
-    {
-        $data = json_decode($request->getContent(), true);
-        $features = $data['features'];
-
-        $prediction = $this->predictService->predict($features);
-
-        return new JsonResponse(['predicted_wait_time' => $prediction]);
-    }
-}
-```
+1. **Entraîne le modèle** : En exécutant `train_model.py` pour entraîner et sauvegarder le modèle.
+2. **Effectue des prédictions** : En exécutant `predict_and_save.py` pour prédire les temps d'attente et sauvegarder les résultats.
 
 ## Conclusion
 
-Ce document présente une approche complète pour la création d'un modèle d'IA de gestion des files d'attente, depuis la collecte et la préparation des données jusqu'au déploiement du modèle avec Symfony. Utilisez les plateformes recommandées pour développer et déployer votre modèle, et suivez les exemples de données et de traitement pour assurer une intégration réussie. Les instructions détaillées pour installer les dépendances et déployer le modèle garantissent une mise en œuvre fluide.
+Ce projet fournit une solution complète pour la création et l'utilisation d'un modèle d'IA pour la gestion des files d'attente. Suivez les instructions pour préparer les données, entraîner le modèle, effectuer des prédictions, et installer les dépendances nécessaires pour exécuter les scripts Python. Assurez-vous que vos données sont correctement formatées et adaptées au modèle pour obtenir les meilleurs résultats.
+```
+
+Ce `README.md` décrit de manière concise les étapes nécessaires pour utiliser le projet, les scripts impliqués, et les dépendances nécessaires, tout en restant pertinent avec les dernières modifications apportées.

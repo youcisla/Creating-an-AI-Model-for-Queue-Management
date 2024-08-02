@@ -1,0 +1,3 @@
+Patient_ID,Arrivée,Départ,Type_Service,Durée,Patients_Attente,Personnel_Dispo,Jour_Semaine,Heure
+1,08:00,08:30,Consultation,30,5,3,Lundi,Matin
+2,08:15,08:45,Urgence,30,6,3,Lundi,Matin
