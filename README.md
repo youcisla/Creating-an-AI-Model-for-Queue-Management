@@ -1,6 +1,3 @@
-Voici le fichier `README.md` mis à jour avec les dernières modifications et en tenant compte de la structure et des fonctions actuelles :
-
-```markdown
 # Création d'un Modèle d'IA pour la Gestion des Files d'Attente
 
 ## Introduction
