@@ -58,6 +58,9 @@ encoded_features = encoder.fit_transform(data[['Type_Service', 'Jour_Semaine', '
 data = pd.concat([data, pd.DataFrame(encoded_features.toarray())], axis=1)
 data.drop(['Type_Service', 'Jour_Semaine', 'Heure'], axis=1, inplace=True)
 
+# Convertir tous les noms de colonnes en chaînes de caractères
+data.columns = data.columns.astype(str)
+
 # Séparer les features et la cible
 X = data.drop(['Durée'], axis=1)
 y = data['Durée']
