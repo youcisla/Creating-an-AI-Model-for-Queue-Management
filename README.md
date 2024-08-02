@@ -77,17 +77,50 @@ print(f'Mean Absolute Error: {mean_absolute_error(y_test, y_pred)}')
 joblib.dump(model, 'model.joblib')
 ```
 
+## Installation des Dépendances
+
+### Dépendances Python
+
+Créez un fichier `requirements.txt` pour lister les dépendances nécessaires :
+
+```txt
+pandas
+scikit-learn
+joblib
+```
+
+Pour installer les dépendances, exécutez la commande suivante dans votre terminal :
+
+```bash
+pip install -r requirements.txt
+```
+
+### Dépendances Symfony
+
+Assurez-vous d'avoir Composer installé. Si ce n'est pas le cas, suivez les instructions sur [getcomposer.org](https://getcomposer.org/).
+
+Installez les dépendances Symfony en exécutant la commande suivante dans le répertoire de votre projet :
+
+```bash
+composer install
+```
+
+### Installation de Python
+
+Vous devrez également installer Python et les modules nécessaires. Assurez-vous d'avoir Python installé, puis créez un environnement virtuel et installez les modules nécessaires :
+
+```bash
+# Créez et activez un environnement virtuel
+python -m venv venv
+source venv/bin/activate  # Sur Windows, utilisez `venv\Scripts\activate`
+
+# Installez les dépendances
+pip install -r requirements.txt
+```
+
 ## Déploiement et Intégration avec Symfony
 
 Pour intégrer et déployer le modèle d'IA avec Symfony, vous pouvez créer un service Symfony pour charger le modèle et créer une API pour les prédictions.
-
-### Installation des Dépendances
-
-Installez les dépendances nécessaires pour interagir avec Python et charger le modèle :
-
-```bash
-composer require symfony/process
-```
 
 ### Création du Service
 
@@ -177,7 +210,7 @@ class PredictController extends AbstractController
         $data = json_decode($request->getContent(), true);
         $features = $data['features'];
 
-        $prediction = $this->.predictService->predict($features);
+        $prediction = $this->predictService->predict($features);
 
         return new JsonResponse(['predicted_wait_time' => $prediction]);
     }
@@ -186,4 +219,4 @@ class PredictController extends AbstractController
 
 ## Conclusion
 
-Ce document présente une approche complète pour la création d'un modèle d'IA de gestion des files d'attente, depuis la collecte et la préparation des données jusqu'au déploiement du modèle avec Symfony. Utilisez les plateformes recommandées pour développer et déployer votre modèle, et suivez les exemples de données et de traitement pour assurer une intégration réussie.
+Ce document présente une approche complète pour la création d'un modèle d'IA de gestion des files d'attente, depuis la collecte et la préparation des données jusqu'au déploiement du modèle avec Symfony. Utilisez les plateformes recommandées pour développer et déployer votre modèle, et suivez les exemples de données et de traitement pour assurer une intégration réussie. Les instructions détaillées pour installer les dépendances et déployer le modèle garantissent une mise en œuvre fluide.
