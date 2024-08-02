@@ -2,7 +2,7 @@
 
 ## Introduction
 
-Ce projet vise à créer un modèle d'intelligence artificielle capable de prédire les temps d'attente et d'optimiser la gestion des files d'attente dans un contexte médical ou administratif. Ce document présente les différentes étapes de la création du modèle, ainsi que des exemples de données et de traitement.
+Ce projet vise à créer un modèle d'intelligence artificielle capable de prédire les temps d'attente et d'optimiser la gestion des files d'attente dans un contexte médical ou administratif. Ce document présente les différentes étapes de la création du modèle, ainsi que des exemples de données et de traitement, tout en utilisant le framework Symfony pour le développement et le déploiement.
 
 ## Plateformes Recommandées
 
@@ -77,27 +77,113 @@ print(f'Mean Absolute Error: {mean_absolute_error(y_test, y_pred)}')
 joblib.dump(model, 'model.joblib')
 ```
 
-## Déploiement et Intégration
+## Déploiement et Intégration avec Symfony
 
-Une fois le modèle entraîné, vous pouvez le déployer et l'intégrer dans votre système existant. Voici un exemple de création d'une API avec Flask pour effectuer des prédictions en temps réel :
+Pour intégrer et déployer le modèle d'IA avec Symfony, vous pouvez créer un service Symfony pour charger le modèle et créer une API pour les prédictions.
+
+### Installation des Dépendances
+
+Installez les dépendances nécessaires pour interagir avec Python et charger le modèle :
+
+```bash
+composer require symfony/process
+```
+
+### Création du Service
+
+Créez un service Symfony pour charger le modèle et effectuer des prédictions. Voici un exemple de service :
+
+```php
+// src/Service/PredictService.php
+namespace App\Service;
+
+use Symfony\Component\Process\Exception\ProcessFailedException;
+use Symfony\Component\Process\Process;
+
+class PredictService
+{
+    private $modelPath;
+
+    public function __construct(string $modelPath)
+    {
+        $this->modelPath = $modelPath;
+    }
+
+    public function predict(array $features): float
+    {
+        $process = new Process(['python3', 'predict.py', json_encode($features), $this->modelPath]);
+        $process->run();
+
+        if (!$process->isSuccessful()) {
+            throw new ProcessFailedException($process);
+        }
+
+        return floatval($process->getOutput());
+    }
+}
+```
+
+### Script de Prédiction Python
+
+Créez un script Python pour charger le modèle et effectuer des prédictions :
 
 ```python
-from flask import Flask, request, jsonify
+# predict.py
+import sys
+import json
 import joblib
 
-app = Flask(__name__)
-model = joblib.load('model.joblib')
+def main():
+    features = json.loads(sys.argv[1])
+    model_path = sys.argv[2]
 
-@app.route('/predict', methods=['POST'])
-def predict():
-    data = request.get_json()
-    prediction = model.predict([data['features']])
-    return jsonify({'predicted_wait_time': prediction[0]})
+    model = joblib.load(model_path)
+    prediction = model.predict([features])
 
-if __name__ == '__main__':
-    app.run(debug=True)
+    print(prediction[0])
+
+if __name__ == "__main__":
+    main()
+```
+
+### Contrôleur Symfony
+
+Créez un contrôleur pour exposer une API de prédiction :
+
+```php
+// src/Controller/PredictController.php
+namespace App\Controller;
+
+use App\Service\PredictService;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Annotation\Route;
+
+class PredictController extends AbstractController
+{
+    private $predictService;
+
+    public function __construct(PredictService $predictService)
+    {
+        $this->predictService = $predictService;
+    }
+
+    /**
+     * @Route("/predict", name="predict", methods={"POST"})
+     */
+    public function predict(Request $request): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        $features = $data['features'];
+
+        $prediction = $this->.predictService->predict($features);
+
+        return new JsonResponse(['predicted_wait_time' => $prediction]);
+    }
+}
 ```
 
 ## Conclusion
 
-Ce document présente une approche complète pour la création d'un modèle d'IA de gestion des files d'attente, depuis la collecte et la préparation des données jusqu'au déploiement du modèle. Utilisez les plateformes recommandées pour développer et déployer votre modèle, et suivez les exemples de données et de traitement pour assurer une intégration réussie.
+Ce document présente une approche complète pour la création d'un modèle d'IA de gestion des files d'attente, depuis la collecte et la préparation des données jusqu'au déploiement du modèle avec Symfony. Utilisez les plateformes recommandées pour développer et déployer votre modèle, et suivez les exemples de données et de traitement pour assurer une intégration réussie.
